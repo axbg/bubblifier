@@ -1,0 +1,6 @@
+.container{
+    margin: 0 auto;
+    width: 99%;
+    border: 1px black solid;
+    text-align: center;
+}
