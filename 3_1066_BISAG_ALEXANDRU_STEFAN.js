@@ -1,8 +1,9 @@
 let canvas, context;
 let graphContainer;
-let dataString = '{"title":"A study of countries","firstParam":"Average of Women Fertility (children/woman)","secondParam":"Average Years Of Schooling","thirdParam":"GDP per capita","years":[{"year":1979,"countries":[{"name":"Romania","color":"red","firstParam":1.26,"secondParam":11.2,"thirdParam":39231.13},{"name":"UK","color":"blue","firstParam":1.37,"secondParam":14.2,"thirdParam":439231.13},{"name":"USA","color":"green","firstParam":2.37,"secondParam":19.2,"thirdParam":49231.13}]}]}'
+let dataString = '{"title":"A study of countries","firstParam":"Average of Women Fertility (children/woman)","secondParam":"Average Years Of Schooling","thirdParam":"GDP per capita","years":[{"year":1979,"countries":[{"name":"Romania","color":"red","firstParam":1.26,"secondParam":11.2,"thirdParam":39231.13},{"name":"UK","color":"blue","firstParam":1.37,"secondParam":11.2,"thirdParam":439231.13},{"name":"USA","color":"green","firstParam":2.37,"secondParam":11.2,"thirdParam":249231.13}]}]}'
 let data;
 let yMarkDistance, xMarkDistance, yValueDistance, xValueDistance;
+let origin, maxRound;
 
 window.onload = function (event) {
 
@@ -13,13 +14,15 @@ window.onload = function (event) {
 
     setDimensions(canvas, graphContainer, 90, 20);
     window.onresize = function (event) {
-        setDimensions(canvas, graphContainer, 90, 20);;
+        setDimensions(canvas, graphContainer, 90, 20);
+        initUI(1979);
+        drawAxis();
+        drawCircles(1979)
     }
-
+    
     initUI(1979);
     drawAxis();
-    drawCircle(1979)
-
+    drawCircles(1979)
 }
 
 function initUI(year) {
@@ -83,7 +86,7 @@ function drawAxis() {
         end: 530
     };
 
-    let origin = {
+    origin = {
         x: 70,
         y: 520
     }
@@ -141,24 +144,35 @@ function drawAxis() {
 
 }
 
-function drawCircles() { }
+function drawCircle(country) {
 
-function drawCircle(year) {
+    let yDistance = origin.y - (country.firstParam / yValueDistance * yMarkDistance);
+    let xDistance = origin.x + (country.secondParam / xValueDistance * xMarkDistance);
 
-    let maxRound = Math.round(getMaxValue("round") + 0.1 * getMaxValue("round"));
+    context.fillStyle = country.color;
+    context.beginPath();
+    context.arc(xDistance, yDistance, getCircleSize(country.thirdParam), 0, 2 * Math.PI);
+    context.fill();
+}
 
-    //will need
-    //let yMarkDistance, xMarkDistance, yValueDistance, xValueDistance to place the circle
-    //we will draw the biggest circles first
+function drawCircles(year) {
+
+    maxRound = Math.round(getMaxValue("round") + 0.1 * getMaxValue("round"));
 
     let searchedYear = data.years.find(currentYear => currentYear.year === year);
 
     if (!searchedYear) {
-        console.log("The searched Year is not valid!");
+        alert("The searched Year is not valid!");
+        return;
     }
 
-    countries = searchedYear.countries.sort(function (a, b) { return (a.thirdParam > b.thirdParam) ? 1 : ((b.thirdParam > a.thirdParam) ? -1 : 0); });
+    countries = searchedYear.countries.sort(function (a, b) { return (a.thirdParam < b.thirdParam) ? 1 : ((b.thirdParam < a.thirdParam) ? -1 : 0); });
 
-    console.log(countries);
+    countries.map(country => {
+        drawCircle(country);
+    });
+}
 
+function getCircleSize(value) {
+    return 100 * value / maxRound;
 }
