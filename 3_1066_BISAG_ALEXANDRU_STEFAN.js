@@ -1,9 +1,9 @@
 let canvas, context;
 let graphContainer;
-let dataString = '{"title":"A study of countries","firstParam":"Average of Women Fertility (children/woman)","secondParam":"Average Years Of Schooling","thirdParam":"GDP per capita","years":[{"year":1979,"countries":[{"name":"Romania","color":"red","firstParam":1.26,"secondParam":11.2,"thirdParam":39231.13},{"name":"UK","color":"blue","firstParam":1.37,"secondParam":11.2,"thirdParam":439231.13},{"name":"USA","color":"green","firstParam":2.37,"secondParam":11.2,"thirdParam":249231.13}]}]}'
+let dataString = '{"title":"A study of countries","firstParam":"Average of Women Fertility (children/woman)","secondParam":"Average Years Of Schooling","thirdParam":"$/capita","years":[{"year":1979,"countries":[{"name":"Romania","color":"#FF7F0E","firstParam":1.26,"secondParam":9.2,"thirdParam":39231.13},{"name":"UK","color":"#1F77B4","firstParam":1.37,"secondParam":11.2,"thirdParam":439231.13},{"name":"USA","color":"#9467BD","firstParam":2.37,"secondParam":11.2,"thirdParam":249231.13}]}]}'
 let data;
 let yMarkDistance, xMarkDistance, yValueDistance, xValueDistance;
-let origin, maxRound;
+let origin, maxRound, countries;
 
 window.onload = function (event) {
 
@@ -19,10 +19,11 @@ window.onload = function (event) {
         drawAxis();
         drawCircles(1979)
     }
-    
+
     initUI(1979);
     drawAxis();
-    drawCircles(1979)
+    drawCircles(1979);
+    populateInfo();
 }
 
 function initUI(year) {
@@ -32,7 +33,6 @@ function initUI(year) {
 function setDimensions(destination, source, heightDifference, widthDifferene) {
     destination.height = source.offsetHeight - heightDifference;
     destination.width = source.offsetWidth - widthDifferene;
-    drawAxis();
 }
 
 function getMaxValue(parameter) {
@@ -70,7 +70,6 @@ function getMaxValue(parameter) {
 function drawAxis() {
     let maxY = Math.round(getMaxValue("y") + 0.1 * getMaxValue("y"));
     let maxX = Math.round(getMaxValue("x") + 0.1 * getMaxValue("x"));
-    //let maxRound = Math.round(getMaxValue("round") + 0.1 * getMaxValue("round"));
 
     let axisNumberDistance = 20;
     let yAxisTop = 40;
@@ -142,6 +141,11 @@ function drawAxis() {
         currentXValue = (currentXValue + xValueDistance);
     }
 
+    context.font = "15px Arial";
+    context.fillText(data.firstParam, 5, 15);
+    context.fillText(data.secondParam, xAxisTop + 20, origin.y + 5);
+
+
 }
 
 function drawCircle(country) {
@@ -175,4 +179,95 @@ function drawCircles(year) {
 
 function getCircleSize(value) {
     return 100 * value / maxRound;
+}
+
+function populateInfo() {
+
+    let container = document.querySelector('.info');
+
+    let fragment = document.createDocumentFragment();
+
+    countries.map(country => {
+        fragment.appendChild(createInfoEntry(country));
+    })
+
+    container.appendChild(fragment);
+}
+
+function createInfoEntry(country) {
+
+    let entry = document.createElement('div');
+
+    entry.classList.add('info-entry');
+
+    let dot = document.createElement('div');
+    dot.style.top = 0;
+    dot.style.display = "inline";
+    dot.style.height = "100px";
+    dot.style.width = "100px";
+    dot.innerText = "\u25CD";
+    dot.style.color = country.color;
+
+    let countryName = document.createElement('h4');
+    countryName.innerText = country.name;
+    countryName.style.margin = 0;
+
+    entry.appendChild(countryName);
+    entry.appendChild(dot);
+
+    entry.addEventListener('click', function () {
+        countryFocus(country);
+    })
+
+    return entry;
+}
+
+function clearCanvas() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.strokeStyle = "black";
+    context.fillStyle = "black";
+    context.setLineDash([]);
+}
+
+function countryFocus(country) {
+    clearCanvas();
+    drawAxis();
+    drawCircles(1979);
+
+    let yDistance = origin.y - (country.firstParam / yValueDistance * yMarkDistance);
+    let xDistance = origin.x + (country.secondParam / xValueDistance * xMarkDistance);
+
+    context.fillStyle = "black";
+    context.beginPath();
+    context.arc(xDistance, yDistance, getCircleSize(country.thirdParam) / 10, 0, 2 * Math.PI);
+    context.fill();
+
+    context.beginPath();
+    context.arc(xDistance, yDistance, getCircleSize(country.thirdParam), 0, 2 * Math.PI);
+    context.stroke();
+
+    context.strokeStyle = "black";
+    context.setLineDash([5, 15]);
+
+    context.beginPath();
+    context.moveTo(origin.x, yDistance);
+    context.lineTo(xDistance, yDistance);
+    context.stroke();
+
+    context.beginPath();
+    context.moveTo(xDistance, origin.y);
+    context.lineTo(xDistance, yDistance);
+
+    context.stroke();
+
+    context.font = "bold 20px Arial";
+    context.fillText(country.thirdParam + " " + data.thirdParam, xDistance + 15, yDistance);
+    context.fillText(country.firstParam, xDistance / 2, yDistance - 5);
+    context.fillText(country.secondParam, xDistance + 5, yDistance + yDistance / 2);
+}
+
+function resetCountryFocus() {
+    clearCanvas();
+    drawAxis();
+    drawCircles(1979);
 }
