@@ -10,7 +10,7 @@
 <body>
     <div class="container">
         <div class="graph-container">
-            <h1 id="title"> title - year </h1>
+            <h1 id="title"></h1>
             <canvas></canvas>
         </div>
 
@@ -22,13 +22,17 @@
 
         <div class="control-container">
             <div class="content-menu">
-                Histogram
+                <button class="bublify-button">Histogram</button>
             </div>
             <div class="content-menu">
-                Time slider
+                <input type="range" class="timeline-range" min=0 max=100>
+                <p class="display-inline timeline-year">Year</p>
             </div>
             <div class="content-menu">
-                Animation Controls
+                <button id="play" class="bublify-button half">▶ / ❚❚</button>
+                <button id="reset" class="bublify-button half">
+                    <strong>⭯</strong>
+                </button>
             </div>
         </div>
 
