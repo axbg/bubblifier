@@ -103,6 +103,7 @@ canvas {
     background-color: white;
     width: 50%;
     height: 80%;
+    user-select: none;
 }
 
 .timeline-range {
@@ -129,4 +130,12 @@ canvas {
 
 .half {
     width: 30%;
+}
+
+.hidden{
+    display: none;
+}
+
+.no-scroll{
+    overflow: hidden;
 }

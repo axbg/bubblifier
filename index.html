@@ -14,23 +14,28 @@
             <canvas></canvas>
         </div>
 
-        <div class="info-container">
+        <div id="bubble" class="info-container">
             <h2 class="display-inline">Info</h2>
             <h4 class="display-inline refresh-info" onclick="resetCountryFocus();">⭯</h4>
             <div class="info"></div>
         </div>
 
+        <div id="histogram" class="info-container hidden">
+            <h2 class="display-inline">Histogram Control</h2>
+            <div class="info histogram-info no-scroll"></div>
+        </div>
+
         <div class="control-container">
             <div class="content-menu">
-                <button class="bublify-button">Histogram</button>
+                <button class="bublify-button" onclick="switchCanvas();">Histogram</button>
             </div>
             <div class="content-menu">
                 <input type="range" class="timeline-range" min=0 max=100>
                 <p class="display-inline timeline-year">Year</p>
             </div>
             <div class="content-menu">
-                <button id="play" class="bublify-button half">▶ / ❚❚</button>
-                <button id="reset" class="bublify-button half">
+                <button id="play" class="bublify-button half" onclick="pauseAnimation();">▶ / ❚❚</button>
+                <button id="reset" class="bublify-button half" onclick="restartAnimation();">
                     <strong>⭯</strong>
                 </button>
             </div>

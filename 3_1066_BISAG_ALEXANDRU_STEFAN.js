@@ -7,8 +7,10 @@ let origin, maxRound, countries;
 let minYear, maxYear;
 let currentCountry = null;
 let currentYear;
-let isPlaying = false;
+let isPlaying = true;
 let canvasFullWidth = null;
+let animationInterval;
+let isBubble = true;
 
 //create redraw function which calls whats needed to update
 
@@ -29,16 +31,21 @@ window.onload = function (event) {
     canvasFullWidth = canvas.width;
 
     window.onresize = function (event) {
-        clearCanvas();
-        setDimensions(canvas, graphContainer, 90, 20);
-        scaleCanvasCoordinates();
-        updateUI(currentYear);
-        drawAxis();
-        drawCircles(currentYear);
-        countryFocus(currentCountry);
+        if (isBubble) {
+            clearCanvas();
+            setDimensions(canvas, graphContainer, 90, 20);
+            scaleCanvasCoordinates();
+            updateUI(currentYear);
+            drawAxis();
+            drawCircles(currentYear);
+            countryFocus(currentCountry);
+        } else {
+            //resize histogram
+        }
     }
 
     slider.addEventListener('input', function (e) {
+        isPlaying = false;
         clearCanvas();
         currentYear = Number(slider.value);
         updateUI(currentYear);
@@ -47,14 +54,31 @@ window.onload = function (event) {
         countryNextYear();
         countryFocus(currentCountry);
         populateInfo();
-        activateCurrentEntry(currentCountry.name);
+        if (currentCountry) {
+            activateCurrentEntry(currentCountry.name);
+        }
     });
+
 
     updateUI(currentYear);
     drawAxis();
     drawCircles(currentYear);
     populateInfo();
     animate();
+}
+
+function drawBubble() {
+    clearCanvas();
+    currentYear = Number(slider.value);
+    updateUI(currentYear);
+    drawAxis();
+    drawCircles(currentYear);
+    countryNextYear();
+    countryFocus(currentCountry);
+    populateInfo();
+    if (currentCountry) {
+        activateCurrentEntry(currentCountry.name);
+    }
 }
 
 function updateUI(year) {
@@ -304,7 +328,6 @@ function countryFocus(country) {
     context.beginPath();
     context.moveTo(xDistance, origin.y);
     context.lineTo(xDistance, yDistance);
-
     context.stroke();
 
     context.font = "bold 20px Arial";
@@ -365,10 +388,9 @@ function countryNextYear() {
     })
 }
 
-function animate(){
-    let interval = setInterval(function(){
-        if(currentYear < maxYear){
-            console.log('called');
+function animate() {
+    animationInterval = setInterval(function () {
+        if (currentYear < maxYear && isPlaying) {
             currentYear++;
             slider.value = currentYear;
             clearCanvas();
@@ -378,11 +400,292 @@ function animate(){
             countryNextYear();
             countryFocus(currentCountry);
             populateInfo();
-            if(currentCountry){
+            if (currentCountry) {
                 activateCurrentEntry(currentCountry.name);
             }
         } else {
-            clearInterval(interval);
+            clearInterval(animationInterval);
+            isPlaying = false;
         }
     }, 1000);
+}
+
+function pauseAnimation() {
+    if (isPlaying) {
+        clearInterval(animationInterval);
+    } else {
+        animate();
+    }
+
+    isPlaying = !isPlaying;
+}
+
+function restartAnimation() {
+    if (!isPlaying) {
+        slider.value = minYear;
+        currentYear = minYear;
+        isPlaying = true;
+        animate();
+    }
+}
+
+function switchCanvas() {
+
+    clearCanvas();
+    let switchButton = document.querySelector('.bublify-button');
+    let bubblePanel = document.getElementById("bubble");
+    let histogramPanel = document.getElementById("histogram");
+    let timeRange = document.querySelector('input[type="range"]');
+    let playButton = document.getElementById('play');
+    let resetButton = document.getElementById('reset');
+    let timelineYear = document.querySelector('.timeline-year');
+
+    isBubble = !isBubble;
+
+    if (isBubble) {
+        let bubblePanel = document.getElementById("bubble");
+        switchButton.innerText = "Histogram";
+        bubblePanel.classList.remove('hidden');
+        pauseAnimation();
+        histogramPanel.classList.add('hidden');
+        timeRange.classList.remove('hidden');
+        playButton.classList.remove('hidden');
+        resetButton.classList.remove('hidden');
+        timelineYear.classList.remove('hidden');
+        isBubble = true;
+        drawBubble();
+    } else {
+        switchButton.innerText = "Bubble Chart";
+        bubblePanel.classList.add('hidden');
+        histogramPanel.classList.remove('hidden');
+        if (isPlaying) {
+            pauseAnimation();
+        }
+        timeRange.classList.add('hidden');
+        playButton.classList.add('hidden');
+        resetButton.classList.add('hidden');
+        timelineYear.classList.add('hidden');
+        isBubble = false;
+        histogramInputMessage();
+        histogramInfo();
+    }
+
+}
+
+function histogramInputMessage(){
+
+    context.font = "35px Arial";
+    context.fillText('Please select a parameter and an entity.', 300, 250);
+
+}
+
+function histogramInfo() {
+    let container = document.querySelector('.histogram-info');
+
+    while (container.firstChild) {
+        container.removeChild(container.firstChild);
+    }
+
+    let form = document.createElement('form');
+
+    //property select box
+    let paramBoxLabel = document.createElement('p')
+    paramBoxLabel.innerText = "Select property";
+
+
+    let paramBox = document.createElement('select');
+    paramBox.name = "param";
+    paramBox.style.width = "80%";
+
+    let firstOption = document.createElement('option');
+    let secondOption = document.createElement('option');
+    let thirdOption = document.createElement('option');
+
+    firstOption.value = "firstParam";
+    firstOption.innerText = data.firstParam;
+    secondOption.value = "secondParam";
+    secondOption.innerText = data.secondParam;
+    thirdOption.value = "thirdParam";
+    thirdOption.innerText = data.thirdParam;
+
+    paramBox.appendChild(firstOption);
+    paramBox.appendChild(secondOption);
+    paramBox.appendChild(thirdOption);
+
+    //country select box
+    let countryBoxLabel = document.createElement('p')
+    countryBoxLabel.innerText = "Select entity";
+
+    let countryBox = document.createElement('select');
+    countryBox.name = "country";
+
+    countries.map(country => {
+        let countryOption = document.createElement('option');
+        countryOption.value = country.name;
+        countryOption.innerText = country.name;
+        countryBox.appendChild(countryOption);
+    })
+
+    let submitButton = document.createElement('button');
+    submitButton.innerText = "Create Histogram";
+    submitButton.style.display = "block";
+    submitButton.style.margin = "0 auto";
+    submitButton.style.marginTop = "10px";
+    submitButton.addEventListener('click', function (e) {
+        e.preventDefault();
+        let country = countryBox.options[countryBox.selectedIndex].value;
+        let param = paramBox.options[paramBox.selectedIndex].value;
+        drawHistogram(param, country);
+    });
+
+    form.appendChild(paramBoxLabel);
+    form.appendChild(paramBox);
+    form.appendChild(countryBoxLabel);
+    form.appendChild(countryBox);
+    form.appendChild(submitButton);
+
+    container.appendChild(form);
+}
+
+function drawHistogram(param, country) {
+    let countryData = extractCountryData(param, country);
+    clearCanvas();
+    drawHistogramAxis(param, countryData, country);
+}
+
+function extractCountryData(param, country) {
+    let countryData = [];
+    switch (param) {
+        case 'firstParam':
+            data.years.map(year => {
+                year.countries.map(indexCountry => {
+                    if (indexCountry.name === country) {
+                        countryData.push(indexCountry.firstParam);
+                    }
+                })
+            });
+            return countryData;
+        case 'secondParam':
+            data.years.map(year => {
+                year.countries.map(indexCountry => {
+                    if (indexCountry.name === country) {
+                        countryData.push(indexCountry.secondParam);
+                    }
+                })
+            })
+            return countryData;
+        case 'thirdParam':
+            data.years.map(year => {
+                year.countries.map(indexCountry => {
+                    if (indexCountry.name === country) {
+                        countryData.push(indexCountry.thirdParam);
+                    }
+                })
+            })
+            return countryData;
+        default:
+            console.log('not valid');
+    }
+}
+
+function drawHistogramAxis(param, countryData, country) {
+
+    let maxY = Math.max(...countryData) + 1 / 10 * Math.max(...countryData);
+    let maxX = maxYear;
+
+    let axisNumberDistance = 20;
+    let yAxisTop = 40;
+    let xAxisTop = 900;
+
+    let yMark = {
+        start: 60,
+        end: 80
+    };
+
+    let xMark = {
+        start: 510,
+        end: 530
+    };
+
+    origin = {
+        x: 70,
+        y: 520
+    }
+
+    yMarkDistance = (origin.y - yAxisTop) / 19;
+    xMarkDistance = (xAxisTop - origin.x) / (countryData.length + 1);
+
+    yValueDistance = (maxY / 19);
+
+    context.fillStyle = "black";
+    context.font = "15px Arial";
+
+    context.beginPath();
+    context.moveTo(origin.x, origin.y);
+    context.lineTo(origin.x, yAxisTop);
+    context.stroke();
+
+    context.beginPath();
+    context.moveTo(origin.x, origin.y);
+    context.lineTo(xAxisTop, origin.y);
+    context.stroke();
+
+    context.fillText("0", origin.x - 30, origin.y + 5)
+
+    context.font = "10px Arial";
+    let currentYDistance = origin.y - yMarkDistance;
+    let currentXDistance = origin.x + xMarkDistance;
+    let currentYValue = yValueDistance;
+
+    for (let i = 0; i < 19; i++) {
+        //drawing y marks and numbers
+        context.beginPath();
+        context.moveTo(yMark.start, currentYDistance);
+        context.lineTo(yMark.end, currentYDistance);
+        context.stroke();
+
+        context.fillText(currentYValue.toFixed(3), yMark.start - axisNumberDistance - 20, currentYDistance + 5);
+
+        currentYDistance -= yMarkDistance;
+        currentYValue = (currentYValue + yValueDistance);
+    }
+
+    drawRectangles(countryData, country);
+
+    context.fillStyle = "black";
+    for (let i = 0, currYear = minYear; i < countryData.length; i++ , currYear++) {
+        //drawing x marks and numbers
+        context.beginPath();
+        context.moveTo(currentXDistance, xMark.start);
+        context.lineTo(currentXDistance, xMark.end);
+        context.stroke();
+
+        context.fillText(currYear, currentXDistance - 15, xMark.start + axisNumberDistance + 15);
+
+        currentXDistance += xMarkDistance;
+    }
+
+    context.font = "15px Arial";
+    context.fillText(data[param], 5, 15);
+    context.fillText("Years", xAxisTop + 20, origin.y + 5);
+
+}
+
+function drawRectangles(countryData, countryName) {
+
+    let currentXDistance = origin.x;
+    let color = (data.years[0].countries.find(country => country.name === countryName)).color;
+    context.fillStyle = color;
+
+    for (let i = 0; i < countryData.length; i++) {
+        currentXDistance += xMarkDistance / 2;
+        currentYDistance = (countryData[i] / yValueDistance) * yMarkDistance;
+        context.rect(currentXDistance, origin.y - currentYDistance, xMarkDistance, currentYDistance);
+        context.fill();
+        context.rect(currentXDistance, origin.y - currentYDistance, xMarkDistance, currentYDistance);
+        context.stroke();
+        context.font = "10px Arial";
+        context.fillText(countryData[i], currentXDistance + xMarkDistance/2 - 5, origin.y - currentYDistance - 5);
+        currentXDistance += xMarkDistance / 2;
+    }
 }
