@@ -13,19 +13,14 @@ let animationInterval;
 let isBubble = true;
 
 //create redraw function which calls whats needed to update
-
 window.onload = function (event) {
-
     data = JSON.parse(dataString);
     graphContainer = document.querySelector('.graph-container');
     canvas = document.querySelector('canvas');
     slider = document.querySelector('input[type="range"');
     context = canvas.getContext('2d');
 
-    calculateYearRange();
-    slider.setAttribute('max', maxYear);
-    slider.setAttribute('min', minYear);
-    slider.value = currentYear = minYear;
+    prepareData();
 
     setDimensions(canvas, graphContainer, 90, 20);
     canvasFullWidth = canvas.width;
@@ -39,32 +34,13 @@ window.onload = function (event) {
             drawAxis();
             drawCircles(currentYear);
             countryFocus(currentCountry);
-        } else {
-            //resize histogram
         }
     }
 
     slider.addEventListener('input', function (e) {
         isPlaying = false;
-        clearCanvas();
-        currentYear = Number(slider.value);
-        updateUI(currentYear);
-        drawAxis();
-        drawCircles(currentYear);
-        countryNextYear();
-        countryFocus(currentCountry);
-        populateInfo();
-        if (currentCountry) {
-            activateCurrentEntry(currentCountry.name);
-        }
+        drawBubble();
     });
-
-
-    updateUI(currentYear);
-    drawAxis();
-    drawCircles(currentYear);
-    populateInfo();
-    animate();
 }
 
 function drawBubble() {
@@ -78,6 +54,63 @@ function drawBubble() {
     populateInfo();
     if (currentCountry) {
         activateCurrentEntry(currentCountry.name);
+    }
+}
+
+function prepareData() {
+    calculateYearRange();
+    slider.setAttribute('max', maxYear);
+    slider.setAttribute('min', minYear);
+    slider.value = currentYear = minYear;
+}
+
+function openBubblifier() {
+
+    let bubblifier = document.getElementById('bubblifier');
+    let landpage = document.getElementById('landpage');
+
+    bubblifier.style.display = "block";
+    landpage.style.display = "none";
+
+    setDimensions(canvas, graphContainer, 90, 20);
+    canvasFullWidth = canvas.width;
+    drawBubble();
+    animate();
+}
+
+function loadJSON(json) {
+    try {
+        data = JSON.parse(json);
+        prepareData();
+        openBubblifier();
+    } catch (ex) {
+        alert('The JSON is not valid!');
+    }
+}
+
+function dragOver(event) {
+    event.preventDefault();
+    console.log('allow');
+}
+
+function dropOver(event) {
+    event.preventDefault();
+    console.log('dropped');
+
+    let file = event.dataTransfer.items[0].getAsFile();
+
+    if (!file || file.type != "application/json") {
+        alert('The uploaded file is not a json!');
+    } else {
+
+        let fileReader = new FileReader();
+
+        fileReader.readAsBinaryString(file);
+
+        fileReader.onloadend = function () {
+            console.log(fileReader.result);
+            loadJSON(fileReader.result);
+        }
     }
 }
 
@@ -472,7 +505,7 @@ function switchCanvas() {
 
 }
 
-function histogramInputMessage(){
+function histogramInputMessage() {
 
     context.font = "35px Arial";
     context.fillText('Please select a parameter and an entity.', 300, 250);
@@ -685,7 +718,7 @@ function drawRectangles(countryData, countryName) {
         context.rect(currentXDistance, origin.y - currentYDistance, xMarkDistance, currentYDistance);
         context.stroke();
         context.font = "10px Arial";
-        context.fillText(countryData[i], currentXDistance + xMarkDistance/2 - 5, origin.y - currentYDistance - 5);
+        context.fillText(countryData[i], currentXDistance + xMarkDistance / 2 - 5, origin.y - currentYDistance - 5);
         currentXDistance += xMarkDistance / 2;
     }
 }

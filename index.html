@@ -8,40 +8,71 @@
 </head>
 
 <body>
-    <div class="container">
-        <div class="graph-container">
-            <h1 id="title"></h1>
-            <canvas></canvas>
-        </div>
-
-        <div id="bubble" class="info-container">
-            <h2 class="display-inline">Info</h2>
-            <h4 class="display-inline refresh-info" onclick="resetCountryFocus();">⭯</h4>
-            <div class="info"></div>
-        </div>
-
-        <div id="histogram" class="info-container hidden">
-            <h2 class="display-inline">Histogram Control</h2>
-            <div class="info histogram-info no-scroll"></div>
-        </div>
-
-        <div class="control-container">
-            <div class="content-menu">
-                <button class="bublify-button" onclick="switchCanvas();">Histogram</button>
+    <div id="landpage">
+        <div class="landpage-grid">
+            <div class="header-container">
+                <h1 class="landpage-header">Bubblifier</h1>
             </div>
-            <div class="content-menu">
-                <input type="range" class="timeline-range" min=0 max=100>
-                <p class="display-inline timeline-year">Year</p>
-            </div>
-            <div class="content-menu">
-                <button id="play" class="bublify-button half" onclick="pauseAnimation();">▶ / ❚❚</button>
-                <button id="reset" class="bublify-button half" onclick="restartAnimation();">
-                    <strong>⭯</strong>
-                </button>
+            <div class="data-container">
+                <div class="landpage-control big-control" ondragover="dragOver(event)" ondrop="dropOver(event)">
+                    <p class="symbol">📁</p>
+                    <p>Drop your JSON here</p>
+                </div>
+                <div class="landpage-control small-control" onclick="openBubblifier();">
+                    <p>Try an example</p>
+                    <p class="symbol">➠</p>
+                </div>
             </div>
         </div>
-
+        <div class="contact-grid">
+            <div class="photo-container">
+                    <p class="small-symbol">
+                            ⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪
+                    </p>
+            </div>
+            <div class="social-container">
+                <h3>Find me on</h3>
+                <a href="https://github.com/axbg" target="_blank"><h4>Github</h4></a>
+            </div>
+        </div>
     </div>
+
+    <div id="bubblifier">
+            <div class="container">
+                <div class="graph-container">
+                    <h1 id="title"></h1>
+                    <canvas></canvas>
+                </div>
+    
+                <div id="bubble" class="info-container">
+                    <h2 class="display-inline">Info</h2>
+                    <h4 class="display-inline refresh-info" onclick="resetCountryFocus();">⭯</h4>
+                    <div class="info"></div>
+                </div>
+    
+                <div id="histogram" class="info-container hidden">
+                    <h2 class="display-inline">Histogram Control</h2>
+                    <div class="info histogram-info no-scroll"></div>
+                </div>
+    
+                <div class="control-container">
+                    <div class="content-menu">
+                        <button class="bublify-button" onclick="switchCanvas();">Histogram</button>
+                    </div>
+                    <div class="content-menu">
+                        <input type="range" class="timeline-range" min=0 max=100>
+                        <p class="display-inline timeline-year">Year</p>
+                    </div>
+                    <div class="content-menu">
+                        <button id="play" class="bublify-button half" onclick="pauseAnimation();">▶ / ❚❚</button>
+                        <button id="reset" class="bublify-button half" onclick="restartAnimation();">
+                            <strong>⭯</strong>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     <script src="./3_1066_BISAG_ALEXANDRU_STEFAN.js"></script>
 </body>
 
