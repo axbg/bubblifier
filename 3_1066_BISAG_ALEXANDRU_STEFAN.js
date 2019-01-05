@@ -10,6 +10,8 @@ let currentYear;
 let isPlaying = false;
 let canvasFullWidth = null;
 
+//create redraw function which calls whats needed to update
+
 window.onload = function (event) {
 
     data = JSON.parse(dataString);
@@ -52,6 +54,7 @@ window.onload = function (event) {
     drawAxis();
     drawCircles(currentYear);
     populateInfo();
+    animate();
 }
 
 function updateUI(year) {
@@ -360,4 +363,26 @@ function countryNextYear() {
             })
         }
     })
+}
+
+function animate(){
+    let interval = setInterval(function(){
+        if(currentYear < maxYear){
+            console.log('called');
+            currentYear++;
+            slider.value = currentYear;
+            clearCanvas();
+            updateUI(currentYear);
+            drawAxis();
+            drawCircles(currentYear);
+            countryNextYear();
+            countryFocus(currentCountry);
+            populateInfo();
+            if(currentCountry){
+                activateCurrentEntry(currentCountry.name);
+            }
+        } else {
+            clearInterval(interval);
+        }
+    }, 1000);
 }
