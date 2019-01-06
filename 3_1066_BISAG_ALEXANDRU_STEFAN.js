@@ -19,12 +19,14 @@ window.onload = function (event) {
 
     prepareData();
 
+    //esc reloads page
+    //p pauses or resumes the animation
     window.addEventListener('keydown', function (event) {
         switch (event.keyCode) {
             case 27:
                 location.reload();
                 break;
-            case 32:
+            case 80:
                 if (isBubble) {
                     pauseAnimation();
                 }
