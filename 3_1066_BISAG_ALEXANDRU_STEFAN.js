@@ -1,29 +1,37 @@
-let canvas, context;
-let graphContainer;
-let dataString = '{"title":"A study of countries","firstParam":"Average of Women Fertility (children/woman)","secondParam":"Average Years Of Schooling","thirdParam":"$/capita","years":[{"year":1979,"countries":[{"name":"Romania","color":"#FF7F0E","firstParam":2.45,"secondParam":8.4,"thirdParam":3930},{"name":"UK","color":"#1F77B4","firstParam":1.72,"secondParam":10.4,"thirdParam":22300},{"name":"USA","color":"#9467BD","firstParam":1.8,"secondParam":12.1,"thirdParam":29100}]},{"year":1980,"countries":[{"name":"Romania","color":"#FF7F0E","firstParam":2.4,"secondParam":8.5,"thirdParam":4060},{"name":"UK","color":"#1F77B4","firstParam":1.73,"secondParam":10.5,"thirdParam":21900},{"name":"USA","color":"#9467BD","firstParam":1.82,"secondParam":12.2,"thirdParam":28700}]},{"year":1981,"countries":[{"name":"Romania","color":"#FF7F0E","firstParam":2.36,"secondParam":8.7,"thirdParam":4190},{"name":"UK","color":"#1F77B4","firstParam":1.74,"secondParam":10.6,"thirdParam":21700},{"name":"USA","color":"#9467BD","firstParam":1.81,"secondParam":12.3,"thirdParam":29200}]},{"year":1982,"countries":[{"name":"Romania","color":"#FF7F0E","firstParam":2.32,"secondParam":8.8,"thirdParam":4320},{"name":"UK","color":"#1F77B4","firstParam":1.76,"secondParam":10.8,"thirdParam":22100},{"name":"USA","color":"#9467BD","firstParam":1.81,"secondParam":12.4,"thirdParam":28400}]}]}'
-let data;
-let yMarkDistance, xMarkDistance, yValueDistance, xValueDistance;
-let origin, maxRound, countries;
-let minYear, maxYear;
-let currentCountry = null;
-let currentYear;
+let canvas, context, graphContainer;
+let exampleDataString = '{"title":"A study of countries","firstParam":"Average of Women Fertility (children/woman)","secondParam":"Average Years Of Schooling","thirdParam":"$/capita","years":[{"year":1979,"countries":[{"name":"Romania","color":"#FF7F0E","firstParam":2.45,"secondParam":8.4,"thirdParam":3930},{"name":"UK","color":"#1F77B4","firstParam":1.72,"secondParam":10.4,"thirdParam":22300},{"name":"USA","color":"#9467BD","firstParam":1.8,"secondParam":12.1,"thirdParam":29100}]},{"year":1980,"countries":[{"name":"Romania","color":"#FF7F0E","firstParam":2.4,"secondParam":8.5,"thirdParam":4060},{"name":"UK","color":"#1F77B4","firstParam":1.73,"secondParam":10.5,"thirdParam":21900},{"name":"USA","color":"#9467BD","firstParam":1.82,"secondParam":12.2,"thirdParam":28700}]},{"year":1981,"countries":[{"name":"Romania","color":"#FF7F0E","firstParam":2.36,"secondParam":8.7,"thirdParam":4190},{"name":"UK","color":"#1F77B4","firstParam":1.74,"secondParam":10.6,"thirdParam":21700},{"name":"USA","color":"#9467BD","firstParam":1.81,"secondParam":12.3,"thirdParam":29200}]},{"year":1982,"countries":[{"name":"Romania","color":"#FF7F0E","firstParam":2.32,"secondParam":8.8,"thirdParam":4320},{"name":"UK","color":"#1F77B4","firstParam":1.76,"secondParam":10.8,"thirdParam":22100},{"name":"USA","color":"#9467BD","firstParam":1.81,"secondParam":12.4,"thirdParam":28400}]}]}'
+let data, countries;
+let origin, yMarkDistance, xMarkDistance, yValueDistance, xValueDistance;
+let minYear, maxYear, maxRound;
+let currentYear, currentCountry = null;
 let isPlaying = true;
 let canvasFullWidth = null;
 let animationInterval;
 let isBubble = true;
 
-//create redraw function which calls whats needed to update
+//application and data init
 window.onload = function (event) {
-    data = JSON.parse(dataString);
+    data = JSON.parse(exampleDataString);
     graphContainer = document.querySelector('.graph-container');
     canvas = document.querySelector('canvas');
-    slider = document.querySelector('input[type="range"');
     context = canvas.getContext('2d');
+    slider = document.querySelector('input[type="range"');
 
     prepareData();
 
-    setDimensions(canvas, graphContainer, 90, 20);
-    canvasFullWidth = canvas.width;
+    window.addEventListener('keydown', function (event) {
+        switch (event.keyCode) {
+            case 27:
+                location.reload();
+                break;
+            case 32:
+                if (isBubble) {
+                    pauseAnimation();
+                }
+            default:
+                break;
+        }
+    })
 
     window.onresize = function (event) {
         if (isBubble) {
@@ -43,20 +51,6 @@ window.onload = function (event) {
     });
 }
 
-function drawBubble() {
-    clearCanvas();
-    currentYear = Number(slider.value);
-    updateUI(currentYear);
-    drawAxis();
-    drawCircles(currentYear);
-    countryNextYear();
-    countryFocus(currentCountry);
-    populateInfo();
-    if (currentCountry) {
-        activateCurrentEntry(currentCountry.name);
-    }
-}
-
 function prepareData() {
     calculateYearRange();
     slider.setAttribute('max', maxYear);
@@ -64,99 +58,39 @@ function prepareData() {
     slider.value = currentYear = minYear;
 }
 
-function openBubblifier() {
-
-    let bubblifier = document.getElementById('bubblifier');
-    let landpage = document.getElementById('landpage');
-
-    bubblifier.style.display = "block";
-    landpage.style.display = "none";
-
-    setDimensions(canvas, graphContainer, 90, 20);
-    canvasFullWidth = canvas.width;
-    drawBubble();
-    animate();
+function calculateYearRange() {
+    minYear = data.years[0].year;
+    maxYear = data.years[data.years.length - 1].year;
 }
 
-function loadJSON(json) {
-    try {
-        data = JSON.parse(json);
-        prepareData();
-        openBubblifier();
-    } catch (ex) {
-        alert('The JSON is not valid!');
+
+//bubble js
+function drawBubble() {
+    currentYear = Number(slider.value);
+
+    clearCanvas();
+    updateUI(currentYear);
+    drawAxis();
+    drawCircles(currentYear);
+    countryNextYear();
+    countryFocus(currentCountry);
+    populateInfo();
+
+    if (currentCountry) {
+        activateCurrentEntry(currentCountry.name);
     }
 }
 
-function dragOver(event) {
-    event.preventDefault();
-    console.log('allow');
-}
-
-function dropOver(event) {
-    event.preventDefault();
-    console.log('dropped');
-
-    let file = event.dataTransfer.items[0].getAsFile();
-
-    if (!file || file.type != "application/json") {
-        alert('The uploaded file is not a json!');
-    } else {
-
-        let fileReader = new FileReader();
-
-        fileReader.readAsBinaryString(file);
-
-        fileReader.onloadend = function () {
-            console.log(fileReader.result);
-            loadJSON(fileReader.result);
-        }
-    }
+function clearCanvas() {
+    context.clearRect(0, 0, canvasFullWidth, canvas.height);
+    context.strokeStyle = "black";
+    context.fillStyle = "black";
+    context.setLineDash([]);
 }
 
 function updateUI(year) {
+    window.document.title = year + " - " + data.title;
     document.getElementById('title').innerText = data.title + " - " + year;
-}
-
-function setDimensions(destination, source, heightDifference, widthDifference) {
-    destination.height = source.offsetHeight - heightDifference;
-    destination.width = source.offsetWidth - widthDifference;
-}
-
-function getMaxValue(parameter) {
-    let max = 0;
-    switch (parameter) {
-        case "y":
-            data.years.map((year) => {
-                year.countries.map((country) => {
-                    max = country.firstParam > max ? country.firstParam : max;
-                })
-            });
-            return max;
-            break;
-        case "x":
-            data.years.map((year) => {
-                year.countries.map((country) => {
-                    max = country.secondParam > max ? country.secondParam : max;
-                })
-            });
-            return max;
-            break;
-        case "round":
-            data.years.map((year) => {
-                year.countries.map((country) => {
-                    max = country.thirdParam > max ? country.thirdParam : max;
-                })
-            });
-            return max;
-            break;
-        default:
-            console.log('param is no good');
-    }
-}
-
-function scaleCanvasCoordinates() {
-    context.scale(canvas.width / canvasFullWidth, 1);
 }
 
 function drawAxis() {
@@ -236,8 +170,60 @@ function drawAxis() {
     context.font = "15px Arial";
     context.fillText(data.firstParam, 5, 15);
     context.fillText(data.secondParam, xAxisTop + 20, origin.y + 5);
+}
 
+function getMaxValue(parameter) {
+    let max = 0;
+    switch (parameter) {
+        case "y":
+            data.years.map((year) => {
+                year.countries.map((country) => {
+                    max = country.firstParam > max ? country.firstParam : max;
+                })
+            });
+            return max;
+            break;
+        case "x":
+            data.years.map((year) => {
+                year.countries.map((country) => {
+                    max = country.secondParam > max ? country.secondParam : max;
+                })
+            });
+            return max;
+            break;
+        case "round":
+            data.years.map((year) => {
+                year.countries.map((country) => {
+                    max = country.thirdParam > max ? country.thirdParam : max;
+                })
+            });
+            return max;
+            break;
+        default:
+            console.log('Parameter is not valid');
+    }
+}
 
+function getCircleSize(value) {
+    return 100 * value / maxRound;
+}
+
+function drawCircles(year) {
+    maxRound = Math.round(getMaxValue("round") + 0.1 * getMaxValue("round"));
+
+    let searchedYear = data.years.find(currentYear => currentYear.year === year);
+
+    if (!searchedYear) {
+        alert("The searched Year is not valid!");
+        return;
+    }
+
+    //descending sort based on third param
+    countries = searchedYear.countries.sort(function (a, b) { return (a.thirdParam < b.thirdParam) ? 1 : ((b.thirdParam < a.thirdParam) ? -1 : 0); });
+
+    countries.map(country => {
+        drawCircle(country);
+    });
 }
 
 function drawCircle(country) {
@@ -251,75 +237,22 @@ function drawCircle(country) {
     context.fill();
 }
 
-function drawCircles(year) {
-    maxRound = Math.round(getMaxValue("round") + 0.1 * getMaxValue("round"));
-    let searchedYear = data.years.find(currentYear => currentYear.year === year);
+function countryNextYear() {
 
-    if (!searchedYear) {
-        alert("The searched Year is not valid!");
+    if (currentCountry === null) {
         return;
     }
 
-    countries = searchedYear.countries.sort(function (a, b) { return (a.thirdParam < b.thirdParam) ? 1 : ((b.thirdParam < a.thirdParam) ? -1 : 0); });
-
-    countries.map(country => {
-        drawCircle(country);
-    });
-}
-
-function getCircleSize(value) {
-    return 100 * value / maxRound;
-}
-
-function populateInfo() {
-    let container = document.querySelector('.info');
-
-    while (container.firstChild) {
-        container.removeChild(container.firstChild);
-    }
-
-    let fragment = document.createDocumentFragment();
-
-    countries.map(country => {
-        fragment.appendChild(createInfoEntry(country));
+    data.years.map(year => {
+        if (year.year === currentYear) {
+            year.countries.map(country => {
+                if (country.name === currentCountry.name) {
+                    currentCountry = country;
+                    return;
+                }
+            })
+        }
     })
-
-    container.appendChild(fragment);
-}
-
-function createInfoEntry(country) {
-
-    let entry = document.createElement('div');
-
-    entry.classList.add('info-entry');
-
-    let dot = document.createElement('div');
-    dot.style.top = 0;
-    dot.style.display = "inline";
-    dot.style.height = "100px";
-    dot.style.width = "100px";
-    dot.innerText = "\u25CD";
-    dot.style.color = country.color;
-
-    let countryName = document.createElement('h4');
-    countryName.innerText = country.name;
-    countryName.style.margin = 0;
-
-    entry.appendChild(countryName);
-    entry.appendChild(dot);
-
-    entry.addEventListener('click', function () {
-        countryFocus(country);
-    })
-
-    return entry;
-}
-
-function clearCanvas() {
-    context.clearRect(0, 0, canvasFullWidth, canvas.height);
-    context.strokeStyle = "black";
-    context.fillStyle = "black";
-    context.setLineDash([]);
 }
 
 function countryFocus(country) {
@@ -372,6 +305,37 @@ function countryFocus(country) {
     activateCurrentEntry(country.name);
 }
 
+function populateInfo() {
+    let container = document.querySelector('.info');
+
+    while (container.firstChild) {
+        container.removeChild(container.firstChild);
+    }
+
+    let fragment = document.createDocumentFragment();
+
+    countries.map(country => {
+        fragment.appendChild(createInfoEntry(country));
+    })
+
+    container.appendChild(fragment);
+}
+
+function activateCurrentEntry(countryName) {
+
+    if (!currentCountry) {
+        return;
+    }
+
+    let entries = document.getElementsByClassName('info-entry');
+    for (let i = 0; i < entries.length; i++) {
+        if (entries[i].firstElementChild.innerText === countryName) {
+            entries[i].classList.add('info-entry-active');
+            return;
+        }
+    }
+}
+
 function resetCountryFocus() {
     currentCountry = null;
     clearCanvas();
@@ -388,37 +352,57 @@ function resetActiveEntry() {
     }
 }
 
-function activateCurrentEntry(countryName) {
-    let entries = document.getElementsByClassName('info-entry');
-    for (let i = 0; i < entries.length; i++) {
-        if (entries[i].firstElementChild.innerText === countryName) {
-            entries[i].classList.add('info-entry-active');
-            return;
-        }
-    }
+function setDimensions(destination, source, heightDifference, widthDifference) {
+    destination.height = source.offsetHeight - heightDifference;
+    destination.width = source.offsetWidth - widthDifference;
 }
 
-function calculateYearRange() {
-    minYear = data.years[0].year;
-    maxYear = data.years[data.years.length - 1].year;
+function scaleCanvasCoordinates() {
+    context.scale(canvas.width / canvasFullWidth, 1);
 }
 
-function countryNextYear() {
+function createInfoEntry(country) {
 
-    if (currentCountry === null) {
-        return;
-    }
+    let entry = document.createElement('div');
 
-    data.years.map(year => {
-        if (year.year === currentYear) {
-            year.countries.map(country => {
-                if (country.name === currentCountry.name) {
-                    currentCountry = country;
-                    return;
-                }
-            })
-        }
+    entry.classList.add('info-entry');
+
+    let dot = document.createElement('div');
+    dot.style.top = 0;
+    dot.style.display = "inline";
+    dot.style.height = "100px";
+    dot.style.width = "100px";
+    dot.innerText = "\u25CD";
+    dot.style.color = country.color;
+
+    let countryName = document.createElement('h4');
+    countryName.innerText = country.name;
+    countryName.style.margin = 0;
+
+    entry.appendChild(countryName);
+    entry.appendChild(dot);
+
+    entry.addEventListener('click', function () {
+        countryFocus(country);
     })
+
+    return entry;
+}
+
+
+// called when bubblifier is opened from the landing page
+function openBubblifier() {
+
+    let bubblifier = document.getElementById('bubblifier');
+    let landpage = document.getElementById('landpage');
+
+    bubblifier.style.display = "block";
+    landpage.style.display = "none";
+
+    setDimensions(canvas, graphContainer, 90, 20);
+    canvasFullWidth = canvas.width;
+    drawBubble();
+    animate();
 }
 
 function animate() {
@@ -440,7 +424,7 @@ function animate() {
             clearInterval(animationInterval);
             isPlaying = false;
         }
-    }, 1000);
+    }, 500);
 }
 
 function pauseAnimation() {
@@ -462,6 +446,8 @@ function restartAnimation() {
     }
 }
 
+
+//changing interface between bubble and histogram
 function switchCanvas() {
 
     clearCanvas();
@@ -479,7 +465,6 @@ function switchCanvas() {
         let bubblePanel = document.getElementById("bubble");
         switchButton.innerText = "Histogram";
         bubblePanel.classList.remove('hidden');
-        pauseAnimation();
         histogramPanel.classList.add('hidden');
         timeRange.classList.remove('hidden');
         playButton.classList.remove('hidden');
@@ -505,11 +490,11 @@ function switchCanvas() {
 
 }
 
-function histogramInputMessage() {
 
+//histogram js
+function histogramInputMessage() {
     context.font = "35px Arial";
     context.fillText('Please select a parameter and an entity.', 300, 250);
-
 }
 
 function histogramInfo() {
@@ -521,7 +506,6 @@ function histogramInfo() {
 
     let form = document.createElement('form');
 
-    //property select box
     let paramBoxLabel = document.createElement('p')
     paramBoxLabel.innerText = "Select property";
 
@@ -545,7 +529,6 @@ function histogramInfo() {
     paramBox.appendChild(secondOption);
     paramBox.appendChild(thirdOption);
 
-    //country select box
     let countryBoxLabel = document.createElement('p')
     countryBoxLabel.innerText = "Select entity";
 
@@ -617,7 +600,7 @@ function extractCountryData(param, country) {
             })
             return countryData;
         default:
-            console.log('not valid');
+            console.log('Parameter is not valid');
     }
 }
 
@@ -720,5 +703,40 @@ function drawRectangles(countryData, countryName) {
         context.font = "10px Arial";
         context.fillText(countryData[i], currentXDistance + xMarkDistance / 2 - 5, origin.y - currentYDistance - 5);
         currentXDistance += xMarkDistance / 2;
+    }
+}
+
+
+//--landing page js
+function loadJSON(json) {
+    try {
+        data = JSON.parse(json);
+        prepareData();
+        openBubblifier();
+    } catch (ex) {
+        alert('The JSON is not valid!');
+    }
+}
+
+function dragOver(event) {
+    event.preventDefault();
+}
+
+function dropOver(event) {
+    event.preventDefault();
+
+    let file = event.dataTransfer.items[0].getAsFile();
+
+    if (!file || file.type != "application/json") {
+        alert('The uploaded file is not a json!');
+    } else {
+
+        let fileReader = new FileReader();
+
+        fileReader.readAsBinaryString(file);
+
+        fileReader.onloadend = function () {
+            loadJSON(fileReader.result);
+        }
     }
 }
