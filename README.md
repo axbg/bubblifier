@@ -1,4 +1,4 @@
-# Bublifier
+# Bubblifier
 ###### An open-source bubble chart & histogram generator
 ###### Multimedia personal project for CSIE, BUES, 2018
 #
