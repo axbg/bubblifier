@@ -19,10 +19,15 @@ window.onload = function (event) {
 
     prepareData();
 
+    //tab alternates between bubble and histogram
     //esc reloads page
     //p pauses or resumes the animation
+    //r restarts the animation
     window.addEventListener('keydown', function (event) {
         switch (event.keyCode) {
+            case 9:
+                switchCanvas();
+                break;
             case 27:
                 location.reload();
                 break;
@@ -30,6 +35,12 @@ window.onload = function (event) {
                 if (isBubble) {
                     pauseAnimation();
                 }
+                break;
+            case 82:
+                if (isBubble) {
+                    restartAnimation();
+                }
+                break;
             default:
                 break;
         }
@@ -426,7 +437,7 @@ function animate() {
             clearInterval(animationInterval);
             isPlaying = false;
         }
-    }, 100);
+    }, 200);
 }
 
 function pauseAnimation() {
