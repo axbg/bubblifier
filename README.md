@@ -1,10 +1,10 @@
 # Bubblifier
-###### An open-source bubble chart & histogram generator
+###### A desktop-oriented open-source bubble chart & histogram generator
 ###### Multimedia personal project for CSIE, BUES, 2018
 #
 The app is written in Vanilla JavaScript, using canvas, so no kind of deploying is necessary.
 You only have to clone this repo, format your data using the following example and load it.
-If you just want to see how the it works, there's an example embedded in the app. 
+If you just want to see how the it works, [check it here](https://axbg.github.io/multimedia-time-series/)
 
 # JSON structure
 As you probably have guessed by now, the data is structured in the following manner using JSON.
