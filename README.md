@@ -4,7 +4,7 @@
 #
 The app is written in Vanilla JavaScript, using canvas, so no kind of deploying is necessary.
 You only have to clone this repo, format your data using the following example and load it.
-If you just want to see how the it works, [check it here](https://axbg.github.io/multimedia-time-series/)
+If you just want to see how the it works, [check it here](https://axbg.github.io/bubblifier/)
 
 # JSON structure
 As you probably have guessed by now, the data is structured in the following manner using JSON.
