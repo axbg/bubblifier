@@ -42,7 +42,7 @@ As you probably have guessed by now, the data is structured in the following man
    ]
 }
 ```
-Logically, is not necessary for your entites to be countries, but the entities are called "countries" as a convention.
+Logically, is not necessary for your entities to be countries, but the entities are called "countries" as a convention.
 
 # Shortcuts
 To make this mini-application a little fancier, I added some keyboard shortcuts for a faster navigation.
